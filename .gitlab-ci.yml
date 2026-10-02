@@ -1,0 +1,18 @@
+image: python:3.12-slim
+
+workflow:
+  rules:
+    # GitLab-hosted copy: MR pipelines (needed for Merge Trains)
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # Skip duplicate branch pipelines when an MR is open
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    # GitHub-hosted repo: run on every branch push,
+    # including GitHub's gh-readonly-queue/* branches
+    - if: $CI_COMMIT_BRANCH
+
+test:
+  script:
+    - pip install -r requirements.txt
+    - sleep 45   # slows CI so the queue/train is visible in the demo
+    - pytest -v
